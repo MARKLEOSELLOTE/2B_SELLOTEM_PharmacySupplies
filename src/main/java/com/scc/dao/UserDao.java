@@ -3,6 +3,8 @@ package com.scc.dao;
 import com.scc.model.User;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
 
@@ -84,6 +86,73 @@ public class UserDao {
             System.out.println("Database error: " + e.getMessage());
         }
         return null;
+    }
+
+    private User mapUser(ResultSet rs) throws SQLException {
+        return new User(
+                rs.getInt("user_Id"),
+                rs.getString("full_Name"),
+                rs.getString("username"),
+                rs.getString("password"),
+                rs.getString("roles"),
+                rs.getString("status"),
+                rs.getString("date_created")
+        );
+    }
+
+    public List<User> getAllUsers() {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT * FROM users ORDER BY user_id";
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(mapUser(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Load users failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public List<User> getPendingUsers() {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE status = 'PENDING' ORDER BY user_id";
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(mapUser(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Load pending users failed: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public boolean updateStatus(int userId, String status) {
+        String sql = "UPDATE users SET status = ? WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Update status failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean deleteUser(int userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Delete user failed: " + e.getMessage());
+            return false;
+        }
     }
 
 }
