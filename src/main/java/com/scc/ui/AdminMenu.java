@@ -217,6 +217,12 @@ public class AdminMenu {
         int id = readInt("Enter user ID (0 to cancel): ");
         if (id == 0) return;
 
+        boolean isPending = pending.stream().anyMatch(u -> u.user_Id() == id);
+        if (!isPending) {
+            System.out.println("That ID is not in the pending list.");
+            return;
+        }
+
         String action = readText("Approve or Reject? (A/R): ");
         String newStatus;
 

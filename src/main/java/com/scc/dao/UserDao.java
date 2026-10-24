@@ -10,8 +10,7 @@ public class UserDao {
 
     public UserDao() {
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement()) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
             defaultAdminGenerator(conn);
         } catch (SQLException e) {
             System.err.println("Error seeding default admin: " + e.getMessage());
@@ -35,12 +34,12 @@ public class UserDao {
 
     }
 
-    public boolean registerUser(String full_name,String username, String password, String roles ){
+    public boolean registerUser(String full_name, String username, String password, String roles) {
 
-        String sql= "INSERT INTO users(full_name, username, password, roles, status) VALUES(?, ?, ?, ?, 'PENDING')";
+        String sql = "INSERT INTO users(full_name, username, password, roles, status) VALUES(?, ?, ?, ?, 'PENDING')";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)){
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, full_name);
             pstmt.setString(2, username);
@@ -49,36 +48,32 @@ public class UserDao {
             pstmt.executeUpdate();
             System.out.println("\n -> Successful Registration, Waiting for Approval!");
             return true;
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println("Failed " + e.getMessage());
             return false;
         }
     }
 
-    public User login(String username, String password){
+    public User login(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, password);
-            try(ResultSet rs = ps.executeQuery()){
-                if(rs.next()){
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
                     String status = rs.getString("status");
-                    if("PENDING".equalsIgnoreCase(status)){
+                    if ("PENDING".equalsIgnoreCase(status)) {
                         System.out.println("\n -> Account is pending, Waiting for Approval");
                         return null;
                     }
-                    return new User(
-                            rs.getInt("user_Id"),
-                            rs.getString("full_Name"),
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("roles"),
-                            rs.getString("status"),
-                            rs.getString("date_created")
-                    );
-                }else{
+                    if ("REJECTED".equalsIgnoreCase(status)) {
+                        System.out.println("\n -> Your account was rejected. Contact the administrator.");
+                        return null;
+                    }
+                    return mapUser(rs);
+                } else {
                     System.out.println("\n -> Invalid username or password");
                 }
             }

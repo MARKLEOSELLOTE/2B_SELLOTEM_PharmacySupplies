@@ -14,7 +14,6 @@ public class Main {
 
          Scanner scanner = new Scanner(System.in);
          UserDao userDao = new UserDao();
-
         Authentication auth = new Authentication(userDao, scanner);
         auth.start();
         scanner.close();
