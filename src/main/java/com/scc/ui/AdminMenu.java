@@ -167,7 +167,8 @@ public class AdminMenu {
             System.out.println("\n----- MANAGE USER ACCOUNTS -----");
             System.out.println(" [1] View All Users");
             System.out.println(" [2] Approve / Reject User");
-            System.out.println(" [3] Delete User");
+            System.out.println(" [3] Update User Role / Status");
+            System.out.println(" [4] Delete User");
             System.out.println(" [0] Back");
             System.out.print("Enter choice: ");
 
@@ -175,12 +176,15 @@ public class AdminMenu {
 
             switch (choice) {
                 case "1":
-                    printUsers(userDao.getAllUsers());
+                    viewUsersWithFilter();
                     break;
                 case "2":
                     approveOrReject();
                     break;
                 case "3":
+                    updateUser(admin);
+                    break;
+                case "4":
                     deleteUser(admin);
                     break;
                 case "0":
@@ -190,6 +194,50 @@ public class AdminMenu {
                     System.out.println("Invalid choice.");
             }
         }
+    }
+
+    private void viewUsersWithFilter() {
+        List<User> all = userDao.getAllUsers();
+        printUsers(all);
+
+        boolean back = false;
+        while (!back) {
+            System.out.println("\nFilter by status:");
+            System.out.println(" [1] PENDING");
+            System.out.println(" [2] APPROVED");
+            System.out.println(" [3] REJECTED");
+            System.out.println(" [4] Show All");
+            System.out.println(" [0] Back");
+            System.out.print("Enter choice: ");
+
+            String choice = sc.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    printUsers(filterByStatus(all, "PENDING"));
+                    break;
+                case "2":
+                    printUsers(filterByStatus(all, "APPROVED"));
+                    break;
+                case "3":
+                    printUsers(filterByStatus(all, "REJECTED"));
+                    break;
+                case "4":
+                    printUsers(all);
+                    break;
+                case "0":
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private List<User> filterByStatus(List<User> users, String status) {
+        return users.stream()
+                .filter(u -> u.status().equalsIgnoreCase(status))
+                .toList();
     }
 
     private void printUsers(List<User> users) {
@@ -239,6 +287,95 @@ public class AdminMenu {
             System.out.println("User " + id + " is now " + newStatus + ".");
         } else {
             System.out.println("User not found.");
+        }
+    }
+
+    private void updateUser(User admin) {
+        List<User> users = userDao.getAllUsers();
+        if (users.isEmpty()) {
+            System.out.println("\nNo users found.");
+            return;
+        }
+
+        printUsers(users);
+        int userId = readInt("Enter user ID to update (0 to cancel): ");
+
+        if (userId == 0) {
+            System.out.println("Cancelled.");
+            return;
+        }
+
+        boolean exists = users.stream().anyMatch(u -> u.user_Id() == userId);
+        if (!exists) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        if (userId == admin.user_Id()) {
+            System.out.println("[WARNING] Modifying the currently logged-in admin is restricted.");
+            return;
+        }
+
+        String newRole = readValidRole();
+        if (newRole == null) {
+            System.out.println("Cancelled.");
+            return;
+        }
+
+        String newStatus = readValidStatus();
+        if (newStatus == null) {
+            System.out.println("Cancelled.");
+            return;
+        }
+
+        if (!userDao.updateUserAndStatus(userId, newRole, newStatus)) {
+            System.out.println("Update failed.");
+        }
+    }
+
+    private String readValidRole() {
+        while (true) {
+            System.out.println("\nSelect Role:");
+            System.out.println(" [1] ADMIN");
+            System.out.println(" [2] PHARMACIST");
+            System.out.println(" [3] INVENTORY_STAFF");
+            System.out.println(" [4] AUDITOR");
+            System.out.println(" [0] Cancel");
+            System.out.print("Enter choice: ");
+
+            String choice = sc.nextLine().trim();
+
+            switch (choice) {
+                case "1": return "ADMIN";
+                case "2": return "PHARMACIST";
+                case "3": return "INVENTORY_STAFF";
+                case "4": return "AUDITOR";
+                case "0": return null;
+                default:
+                    System.out.println("[ERROR] Invalid choice.");
+            }
+        }
+    }
+
+    private String readValidStatus() {
+        while (true) {
+            System.out.println("\nSelect Status:");
+            System.out.println(" [1] PENDING");
+            System.out.println(" [2] APPROVED");
+            System.out.println(" [3] REJECTED");
+            System.out.println(" [0] Cancel");
+            System.out.print("Enter choice: ");
+
+            String choice = sc.nextLine().trim();
+
+            switch (choice) {
+                case "1": return "PENDING";
+                case "2": return "APPROVED";
+                case "3": return "REJECTED";
+                case "0": return null;
+                default:
+                    System.out.println("[ERROR] Invalid choice.");
+            }
         }
     }
 
