@@ -54,6 +54,26 @@ public class UserDao {
         }
     }
 
+    // Used by Admin > Manage User Accounts > Add User
+    public boolean addUser(String fullName, String username, String password, String role, String status) {
+        String sql = "INSERT INTO users(full_name, username, password, roles, status) VALUES(?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, fullName);
+            ps.setString(2, username);
+            ps.setString(3, password);
+            ps.setString(4, role.toUpperCase());
+            ps.setString(5, status.toUpperCase());
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Add user failed: " + e.getMessage());
+            return false;
+        }
+    }
+
     public User login(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 

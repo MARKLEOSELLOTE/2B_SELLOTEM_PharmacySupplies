@@ -165,10 +165,11 @@ public class AdminMenu {
 
         while (!back) {
             System.out.println("\n----- MANAGE USER ACCOUNTS -----");
-            System.out.println(" [1] View All Users");
-            System.out.println(" [2] Approve / Reject User");
-            System.out.println(" [3] Update User Role / Status");
-            System.out.println(" [4] Delete User");
+            System.out.println(" [1] Add User");
+            System.out.println(" [2] View All Users");
+            System.out.println(" [3] Approve / Reject User");
+            System.out.println(" [4] Update User Role / Status");
+            System.out.println(" [5] Delete User");
             System.out.println(" [0] Back");
             System.out.print("Enter choice: ");
 
@@ -176,15 +177,18 @@ public class AdminMenu {
 
             switch (choice) {
                 case "1":
-                    viewUsersWithFilter();
+                    addUser();
                     break;
                 case "2":
-                    approveOrReject();
+                    viewUsersWithFilter();
                     break;
                 case "3":
-                    updateUser(admin);
+                    approveOrReject();
                     break;
                 case "4":
+                    updateUser(admin);
+                    break;
+                case "5":
                     deleteUser(admin);
                     break;
                 case "0":
@@ -399,6 +403,40 @@ public class AdminMenu {
             System.out.println("User deleted.");
         } else {
             System.out.println("User not found.");
+        }
+    }
+
+    private void addUser() {
+        System.out.println("\n----- ADD USER -----");
+
+        String fullName = readText("Full name: ");
+        String username = readText("Username: ");
+
+        boolean taken = userDao.getAllUsers().stream()
+                .anyMatch(u -> u.username().equalsIgnoreCase(username));
+        if (taken) {
+            System.out.println("Username already exists.");
+            return;
+        }
+
+        String password = readText("Password: ");
+
+        String role = readValidRole();
+        if (role == null) {
+            System.out.println("Cancelled.");
+            return;
+        }
+
+        String status = readValidStatus();
+        if (status == null) {
+            System.out.println("Cancelled.");
+            return;
+        }
+
+        if (userDao.addUser(fullName, username, password, role, status)) {
+            System.out.println("User '" + username + "' added as " + role + " (" + status + ").");
+        } else {
+            System.out.println("Failed to add user.");
         }
     }
 
