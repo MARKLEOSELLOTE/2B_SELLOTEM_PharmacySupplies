@@ -122,9 +122,6 @@ public class Authentication {
     }
 
     public void handleLogin() {
-        String selectedRole = selectRole();
-        if (selectedRole == null) return;
-
         System.out.print("Enter Username: ");
         String username = sc.nextLine().trim();
 
@@ -133,11 +130,6 @@ public class Authentication {
 
         User user = userDao.login(username, password);
         if (user == null) return;
-
-        if (!user.roles().equals(selectedRole)) {
-            System.out.println("\n -> This account is not a " + selectedRole + " account.");
-            return;
-        }
 
         System.out.println("\n -> Welcome " + user.full_name() + " | ROLE: " + user.roles());
 
