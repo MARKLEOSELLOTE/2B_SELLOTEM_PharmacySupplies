@@ -1,5 +1,6 @@
 package com.scc.ui;
 
+import com.scc.dao.ActivityLogDao;
 import com.scc.dao.SupplyDao;
 import com.scc.model.Supply;
 import com.scc.model.User;
@@ -8,6 +9,7 @@ import java.util.Scanner;
 public class InventoryStaffMenu {
     private final Scanner sc;
     private final SupplyDao supplyDao = new SupplyDao();
+    private final ActivityLogDao logDao = new ActivityLogDao();
 
     public InventoryStaffMenu(Scanner sc) {
         this.sc = sc;
@@ -33,10 +35,10 @@ public class InventoryStaffMenu {
                     ConsoleUtil.printSupplies(supplyDao.getAllSupplies());
                     break;
                 case "2":
-                    addSupply();
+                    addSupply(user);
                     break;
                 case "3":
-                    stockIn();
+                    stockIn(user);
                     break;
                 case "4":
                     ConsoleUtil.printSupplies(supplyDao.getLowStock());
@@ -51,7 +53,7 @@ public class InventoryStaffMenu {
         }
     }
 
-    private void addSupply() {
+    private void addSupply(User user) {
         String name = ConsoleUtil.readText(sc, "Product name: ");
         String category = ConsoleUtil.readText(sc, "Category: ");
         int quantity = ConsoleUtil.readInt(sc, "Quantity: ");
@@ -61,10 +63,12 @@ public class InventoryStaffMenu {
 
         if (supplyDao.addSupply(name, category, quantity, price, expiry, reorder)) {
             System.out.println("Product added.");
+            logDao.logAction(user.user_Id(), "SUPPLY_ADDED",
+                    "Added new supply " + name + " (Qty: " + quantity + ")");
         }
     }
 
-    private void stockIn() {
+    private void stockIn(User user) {
         ConsoleUtil.printSupplies(supplyDao.getAllSupplies());
         int id = ConsoleUtil.readInt(sc, "Enter product ID (0 to cancel): ");
         if (id == 0) return;
@@ -80,6 +84,8 @@ public class InventoryStaffMenu {
 
         if (supplyDao.adjustQuantity(id, qty)) {
             System.out.println("Added " + qty + " to " + s.name() + ".");
+            logDao.logAction(user.user_Id(), "STOCK_IN",
+                    "Stocked in " + qty + " of " + s.name() + " (Product #" + id + ")");
         }
     }
 }

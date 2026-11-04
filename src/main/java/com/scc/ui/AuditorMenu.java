@@ -1,6 +1,5 @@
 package com.scc.ui;
 
-import com.scc.dao.SupplyDao;
 import com.scc.dao.UserDao;
 import com.scc.model.User;
 import java.util.Scanner;
@@ -8,7 +7,6 @@ import java.util.Scanner;
 public class AuditorMenu {
     private final Scanner sc;
     private final UserDao userDao;
-    private final SupplyDao supplyDao = new SupplyDao();
 
     public AuditorMenu(Scanner sc, UserDao userDao) {
         this.sc = sc;
@@ -32,16 +30,16 @@ public class AuditorMenu {
 
             switch (sc.nextLine().trim()) {
                 case "1":
-                    ConsoleUtil.printSupplies(supplyDao.getAllSupplies());
+                    comingSoon("VIEW ALL SUPPLIES");
                     break;
                 case "2":
-                    ConsoleUtil.printSupplies(supplyDao.getLowStock());
+                    comingSoon("VIEW LOW STOCK");
                     break;
                 case "3":
-                    ConsoleUtil.printSupplies(supplyDao.getExpiringSoon());
+                    comingSoon("VIEW EXPIRED / NEAR EXPIRY (30 DAYS)");
                     break;
                 case "4":
-                    printUsers();
+                    comingSoon("VIEW ALL USERS");
                     break;
                 case "0":
                     System.out.println("\nLogging out...\n");
@@ -53,13 +51,16 @@ public class AuditorMenu {
         }
     }
 
-    private void printUsers() {
+    private void comingSoon(String title) {
+        System.out.println("\n==========================================");
+        System.out.println("   " + title);
+        System.out.println("==========================================");
         System.out.println();
-        System.out.printf("%-5s %-25s %-15s %-18s %-10s%n", "ID", "FULL NAME", "USERNAME", "ROLE", "STATUS");
-        System.out.println("-------------------------------------------------------------------------");
-        for (User u : userDao.getAllUsers()) {
-            System.out.printf("%-5d %-25s %-15s %-18s %-10s%n",
-                    u.user_Id(), u.full_name(), u.username(), u.roles(), u.status());
-        }
+        System.out.println("            COMING SOON...");
+        System.out.println();
+        System.out.println("   This feature is still under development.");
+        System.out.println("==========================================");
+        System.out.print("\nPress Enter to go back...");
+        sc.nextLine();
     }
 }

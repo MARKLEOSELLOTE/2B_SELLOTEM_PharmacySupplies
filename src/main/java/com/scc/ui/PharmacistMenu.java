@@ -1,13 +1,10 @@
 package com.scc.ui;
 
-import com.scc.dao.SupplyDao;
-import com.scc.model.Supply;
 import com.scc.model.User;
 import java.util.Scanner;
 
 public class PharmacistMenu {
     private final Scanner sc;
-    private final SupplyDao supplyDao = new SupplyDao();
 
     public PharmacistMenu(Scanner sc) {
         this.sc = sc;
@@ -29,14 +26,13 @@ public class PharmacistMenu {
 
             switch (sc.nextLine().trim()) {
                 case "1":
-                    ConsoleUtil.printSupplies(supplyDao.getAllSupplies());
+                    comingSoon("VIEW AVAILABLE SUPPLIES");
                     break;
                 case "2":
-                    String keyword = ConsoleUtil.readText(sc, "Search name: ");
-                    ConsoleUtil.printSupplies(supplyDao.searchByName(keyword));
+                    comingSoon("SEARCH SUPPLY");
                     break;
                 case "3":
-                    dispense();
+                    comingSoon("DISPENSE SUPPLY");
                     break;
                 case "0":
                     System.out.println("\nLogging out...\n");
@@ -48,24 +44,16 @@ public class PharmacistMenu {
         }
     }
 
-    private void dispense() {
-        ConsoleUtil.printSupplies(supplyDao.getAllSupplies());
-        int id = ConsoleUtil.readInt(sc, "Enter product ID to dispense (0 to cancel): ");
-        if (id == 0) return;
-
-        Supply s = supplyDao.getById(id);
-        if (s == null) {
-            System.out.println("Product not found.");
-            return;
-        }
-
-        int qty = ConsoleUtil.readInt(sc, "Quantity to dispense: ");
-        if (qty == 0) return;
-
-        if (supplyDao.adjustQuantity(id, -qty)) {
-            System.out.println("Dispensed " + qty + " of " + s.name() + ".");
-        } else {
-            System.out.println("Not enough stock. Available: " + s.quantity());
-        }
+    private void comingSoon(String title) {
+        System.out.println("\n==========================================");
+        System.out.println("   " + title);
+        System.out.println("==========================================");
+        System.out.println();
+        System.out.println("            COMING SOON...");
+        System.out.println();
+        System.out.println("   This feature is still under development.");
+        System.out.println("==========================================");
+        System.out.print("\nPress Enter to go back...");
+        sc.nextLine();
     }
 }

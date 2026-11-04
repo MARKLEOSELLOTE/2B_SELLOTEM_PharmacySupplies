@@ -1,5 +1,6 @@
 package com.scc.ui;
 
+import com.scc.dao.ActivityLogDao;
 import com.scc.dao.UserDao;
 import com.scc.model.User;
 import java.util.Scanner;
@@ -8,6 +9,7 @@ public class Authentication {
 
     private final UserDao userDao;
     private final Scanner sc;
+    private final ActivityLogDao logDao = new ActivityLogDao();
 
     public Authentication(UserDao userDao, Scanner sc) {
         this.userDao = userDao;
@@ -40,34 +42,6 @@ public class Authentication {
                     break;
                 default:
                     System.out.println("Invalid option! Please choose 1, 2, or 3.");
-            }
-        }
-    }
-
-    private String selectRole() {
-        while (true) {
-            System.out.println("\nLogin as:");
-            System.out.println(" [1] Pharmacy Administrator");
-            System.out.println(" [2] Pharmacist");
-            System.out.println(" [3] Inventory Staff");
-            System.out.println(" [4] Auditor");
-            System.out.println(" [0] Back");
-            System.out.print("Select role: ");
-            String input = sc.nextLine().trim();
-
-            switch (input) {
-                case "1":
-                    return "ADMIN";
-                case "2":
-                    return "PHARMACIST";
-                case "3":
-                    return "INVENTORY STAFF";
-                case "4":
-                    return "AUDITOR";
-                case "0":
-                    return null;
-                default:
-                    System.out.println("Invalid choice. Please enter 0 to 4.");
             }
         }
     }
@@ -109,7 +83,7 @@ public class Authentication {
                 role = "PHARMACIST";
                 break;
             } else if (roleInput.equals("3")) {
-                role = "INVENTORY STAFF";
+                role = "INVENTORY_STAFF";
                 break;
             } else if (roleInput.equals("4")) {
                 role = "AUDITOR";
@@ -133,12 +107,18 @@ public class Authentication {
 
         System.out.println("\n -> Welcome " + user.full_name() + " | ROLE: " + user.roles());
 
+        logDao.logAction(user.user_Id(), "LOGIN",
+                "User " + user.username() + " (ID: " + user.user_Id() + ") logged in.");
+
         switch (user.roles()) {
             case "ADMIN" -> new AdminMenu(sc, userDao).display(user);
             case "PHARMACIST" -> new PharmacistMenu(sc).display(user);
-            case "INVENTORY STAFF" -> new InventoryStaffMenu(sc).display(user);
+            case "INVENTORY_STAFF" -> new InventoryStaffMenu(sc).display(user);
             case "AUDITOR" -> new AuditorMenu(sc, userDao).display(user);
             default -> System.out.println("Account role not found!");
         }
+
+        logDao.logAction(user.user_Id(), "LOGOUT",
+                "User " + user.username() + " (ID: " + user.user_Id() + ") logged out.");
     }
 }

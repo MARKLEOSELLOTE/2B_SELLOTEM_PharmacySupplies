@@ -54,7 +54,6 @@ public class UserDao {
         }
     }
 
-    // Used by Admin > Manage User Accounts > Add User
     public boolean addUser(String fullName, String username, String password, String role, String status) {
         String sql = "INSERT INTO users(full_name, username, password, roles, status) VALUES(?, ?, ?, ?, ?)";
 

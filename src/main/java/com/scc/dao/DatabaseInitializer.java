@@ -6,7 +6,7 @@ import java.sql.Statement;
 
 public class DatabaseInitializer {
 
-    public static void initailize() {
+    public static void initialize() {
         String users = "CREATE TABLE IF NOT EXISTS users ("
                 + "user_id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "full_name TEXT NOT NULL, "
@@ -27,10 +27,20 @@ public class DatabaseInitializer {
                 + "reorder_level INTEGER NOT NULL DEFAULT 10"
                 + ")";
 
+        String activityLogs = "CREATE TABLE IF NOT EXISTS activity_logs ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "user_id INTEGER NOT NULL, "
+                + "action_type TEXT NOT NULL, "
+                + "description TEXT NOT NULL, "
+                + "timestamp TEXT NOT NULL DEFAULT (datetime('now','localtime')), "
+                + "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE"
+                + ")";
+
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute(users);
             stmt.execute(supplies);
+            stmt.execute(activityLogs);
             System.out.println("-> Database tables verified.");
         } catch (SQLException e) {
             System.out.println("Database initialization failed: " + e.getMessage());
