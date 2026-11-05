@@ -19,14 +19,16 @@ public class UserDao {
     }
 
     public void defaultAdminGenerator(Connection conn) {
-        String checkSql = "SELECT COUNT(*) FROM users WHERE roles ='ADMIN'";
+        String checkSql = "SELECT COUNT(*) FROM users WHERE roles = 'ADMIN'";
         String insertSql = "INSERT INTO users(full_name, username, password, roles, status) VALUES('Pharmacist Administrator', 'admin', 'admin123', 'ADMIN', 'APPROVED')";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(checkSql)) {
+        try (PreparedStatement check = conn.prepareStatement(checkSql);
+             ResultSet rs = check.executeQuery()) {
             if (rs.next() && rs.getInt(1) == 0) {
-                stmt.executeUpdate(insertSql);
-                System.out.println("\n -> Default Admin created");
+                try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+                    insert.executeUpdate();
+                    System.out.println("\n -> Default Admin created");
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error seeding default admin: " + e.getMessage());
@@ -118,8 +120,8 @@ public class UserDao {
         List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM users ORDER BY user_id";
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(mapUser(rs));
             }
@@ -133,8 +135,8 @@ public class UserDao {
         List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE status = 'PENDING' ORDER BY user_id";
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(mapUser(rs));
             }

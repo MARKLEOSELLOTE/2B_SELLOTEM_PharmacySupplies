@@ -27,6 +27,21 @@ public class DatabaseInitializer {
                 + "reorder_level INTEGER NOT NULL DEFAULT 10"
                 + ")";
 
+        String stockTransactions = "CREATE TABLE IF NOT EXISTS stock_transactions ("
+                + "transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "supply_id INTEGER NOT NULL, "
+                + "user_id INTEGER NOT NULL, "
+                + "transaction_type TEXT NOT NULL, "
+                + "quantity INTEGER NOT NULL, "
+                + "customer TEXT, "
+                + "total REAL NOT NULL DEFAULT 0, "
+                + "transaction_date TEXT NOT NULL DEFAULT (datetime('now','localtime')), "
+                + "remarks TEXT, "
+                + "is_voided INTEGER NOT NULL DEFAULT 0, "
+                + "FOREIGN KEY (supply_id) REFERENCES supplies(supply_id) ON DELETE CASCADE, "
+                + "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE"
+                + ")";
+
         String activityLogs = "CREATE TABLE IF NOT EXISTS activity_logs ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "user_id INTEGER NOT NULL, "
@@ -40,6 +55,7 @@ public class DatabaseInitializer {
              Statement stmt = conn.createStatement()) {
             stmt.execute(users);
             stmt.execute(supplies);
+            stmt.execute(stockTransactions);
             stmt.execute(activityLogs);
             System.out.println("-> Database tables verified.");
         } catch (SQLException e) {

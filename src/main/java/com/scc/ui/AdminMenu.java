@@ -240,8 +240,9 @@ public class AdminMenu {
 
         if (supplyDao.updateSupply(id, name, category, price, expiry, reorder)) {
             System.out.println("Product updated.");
-            log(admin, "SUPPLY_UPDATED",
-                    "Admin " + admin.user_Id() + " updated product #" + id + " (" + old.name() + ")");
+            log(admin, "SUPPLY_UPDATED", String.format(
+                    "Admin %d updated Product #%d (%s): price %.2f -> %.2f, reorder %d -> %d",
+                    admin.user_Id(), id, old.name(), old.price(), price, old.reorder_level(), reorder));
         } else {
             System.out.println("Product not found.");
         }
@@ -403,11 +404,9 @@ public class AdminMenu {
         if (userDao.updateStatus(id, newStatus)) {
             System.out.println("User " + id + " is now " + newStatus + ".");
             if (newStatus.equals("APPROVED")) {
-                log(admin, "USER_APPROVED",
-                        "Admin " + admin.user_Id() + " approved account for User ID " + id);
+                log(admin, "USER_APPROVED", "Admin " + admin.user_Id() + " approved User " + id);
             } else {
-                log(admin, "USER_REJECTED",
-                        "Admin " + admin.user_Id() + " rejected account for User ID " + id);
+                log(admin, "USER_REJECTED", "Admin " + admin.user_Id() + " rejected User " + id);
             }
         } else {
             System.out.println("User not found.");
@@ -454,8 +453,8 @@ public class AdminMenu {
 
         if (userDao.updateUserAndStatus(userId, newRole, newStatus)) {
             log(admin, "USER_UPDATED",
-                    "Admin " + admin.user_Id() + " changed User " + userId
-                            + " to " + newRole + " / " + newStatus);
+                    "Admin " + admin.user_Id() + " updated User " + userId
+                            + ": Role changed to " + newRole + ", status " + newStatus);
         } else {
             System.out.println("Update failed.");
         }
